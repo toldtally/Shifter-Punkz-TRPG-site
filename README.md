@@ -1,1 +1,1 @@
-# sp-char-creator-demo
+# sp-char-sheet-demo
