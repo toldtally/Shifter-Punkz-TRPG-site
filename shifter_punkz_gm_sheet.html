@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shifter Punkz — GM Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e1113; --panel:#171b1e; --panel2:#1d2226; --line:#3a4148;
+  --line-strong:#6b747c; --ink:#e7eaec; --ink-dim:#9aa3aa; --ink-faint:#5f6870;
+  --hp:#e0432c; --sp:#22b99b; --warn:#e0b23c;
+  font-family:'Inter',sans-serif;
+}
+@media (prefers-color-scheme: light){
+  :root{
+    --bg:#eef0f1; --panel:#ffffff; --panel2:#f5f6f7; --line:#c7ccd0;
+    --line-strong:#9098a0; --ink:#15181a; --ink-dim:#565f66; --ink-faint:#8a929a;
+  }
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);}
+body{padding:20px 20px 60px;}
+h1,h2,h3,button,.label,summary{font-family:'Rajdhani',sans-serif;}
+.wrap{max-width:1400px;margin:0 auto;}
+header.top{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  border-bottom:2px solid var(--line-strong);padding-bottom:14px;margin-bottom:18px;}
+header.top h1{font-size:26px;font-weight:700;letter-spacing:.04em;margin:0;text-transform:uppercase;}
+.sub{color:var(--ink-dim);font-size:13px;letter-spacing:.03em;}
+
+.panel{background:var(--panel);border:1px solid var(--line);margin-bottom:14px;}
+.panel-head{background:var(--panel2);border-bottom:1px solid var(--line);padding:8px 14px;
+  clip-path:polygon(0 0,100% 0,100% 100%,14px 100%,0 calc(100% - 14px));}
+.panel-head h2{margin:0;font-size:15px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;}
+.panel-body{padding:14px;}
+
+.drop{border:2px dashed var(--line-strong);padding:26px 14px;text-align:center;color:var(--ink-dim);
+  font-size:14px;transition:.15s;}
+.drop.over{border-color:var(--sp);color:var(--sp);background:var(--panel2);}
+.pick{color:var(--sp);cursor:pointer;text-decoration:underline;}
+.hint{font-size:11.5px;color:var(--ink-faint);line-height:1.5;margin-top:8px;}
+.msg{font-size:13px;margin-top:10px;min-height:18px;color:var(--sp);white-space:pre-wrap;}
+.msg.bad{color:var(--hp);}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
+.btn{font-weight:700;letter-spacing:.05em;text-transform:uppercase;font-size:13px;padding:9px 16px;
+  cursor:pointer;border:1px solid var(--line-strong);background:var(--panel2);color:var(--ink);}
+.btn:hover{border-color:var(--sp);}
+.btn.ghost:hover{border-color:var(--hp);color:var(--hp);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+.party-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;}
+.pcard{border:1px solid var(--line);background:var(--panel);padding:10px 12px;}
+.pcard h3{margin:0 0 2px;font-size:18px;letter-spacing:.03em;}
+.pcard .who{font-size:12px;color:var(--ink-faint);margin-bottom:6px;}
+.pcard .ln{font-size:12.5px;color:var(--ink-dim);margin-top:5px;line-height:1.45;white-space:pre-wrap;}
+.pcard .ln b{color:var(--ink);font-weight:600;}
+.pcard .ln.warn{color:var(--hp);}
+.pcard details{margin-top:8px;}
+.pcard summary{cursor:pointer;color:var(--ink);font-weight:700;letter-spacing:.05em;text-transform:uppercase;font-size:12px;}
+.pcard input,.pcard textarea{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--ink);
+  padding:6px 8px;font-family:'Inter',sans-serif;font-size:13px;border-radius:2px;margin-top:6px;}
+.pcard textarea{resize:vertical;min-height:54px;line-height:1.4;}
+.pcard input:focus,.pcard textarea:focus{outline:2px solid var(--sp);outline-offset:-1px;}
+.pcard .foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:8px;}
+.pcard .foot .stamp{font-size:11px;color:var(--ink-faint);}
+.pcard .rm{font-size:11.5px;padding:4px 10px;}
+.empty{color:var(--ink-dim);font-size:14px;padding:10px 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Shifter Punkz — GM Sheet</h1>
+    <div class="sub" id="count">0 ตัวละคร</div>
+  </header>
+
+  <div class="panel">
+    <div class="panel-head"><h2>Import</h2></div>
+    <div class="panel-body">
+      <div class="drop" id="drop">
+        ลากไฟล์ .json ของผู้เล่นมาวางที่นี่ หรือ
+        <label class="pick">เลือกไฟล์<input type="file" id="file" accept=".json,application/json" multiple hidden></label>
+      </div>
+      <div class="hint">
+        รับไฟล์ที่ผู้เล่น Export JSON จากใบตัวละคร (เลือกได้หลายไฟล์พร้อมกัน) และไฟล์ "Export ทั้งปาร์ตี้" จากหน้านี้หรือจากหน้า Party บน claude.ai
+        ถ้าชื่อตัวละครซ้ำกับที่มีอยู่ จะอัปเดตทับข้อมูลเดิม (คงชื่อผู้เล่นและโน้ต GM ไว้) · ข้อมูลเก็บในเบราว์เซอร์เครื่องนี้ ใช้ Export เก็บสำรองได้
+      </div>
+      <div class="msg" id="msg"></div>
+      <div class="row">
+        <button class="btn" id="exportBtn" type="button">Export ทั้งปาร์ตี้ (JSON)</button>
+        <button class="btn ghost" id="clearBtn" type="button">ล้างทั้งหมด</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="list"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var KEY = "sp_gm_party";
+  var party = [];
+
+  function $(id){ return document.getElementById(id); }
+  function el(tag, cls, text){
+    var e = document.createElement(tag);
+    if(cls) e.className = cls;
+    if(text !== undefined && text !== null) e.textContent = text;
+    return e;
+  }
+  function msg(t, bad){ var m = $("msg"); m.textContent = t; m.className = "msg" + (bad ? " bad" : ""); }
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(KEY);
+      if(raw){ var a = JSON.parse(raw); if(Array.isArray(a)) party = a; }
+    }catch(e){}
+  }
+  function save(){
+    try{ localStorage.setItem(KEY, JSON.stringify(party)); }
+    catch(e){ msg("บันทึกในเบราว์เซอร์ไม่ได้ — ใช้ปุ่ม Export เก็บไฟล์ไว้", true); }
+  }
+
+  // Accept: a single sheet (Export JSON), a list of sheets, or a party export ([{playerName, sheet, ...}])
+  function normalize(data){
+    var out = [];
+    (Array.isArray(data) ? data : [data]).forEach(function(it){
+      if(!it || typeof it !== "object") return;
+      var wrapped = it.sheet && typeof it.sheet === "object";
+      var sheet = wrapped ? it.sheet : it;
+      if(typeof sheet.name !== "string" || !sheet.name.trim()) return;
+      if(!sheet.hp && !sheet.factor && !sheet.basicAbility) return;   // doesn't look like a character sheet
+      out.push({
+        sheet: sheet,
+        playerName: wrapped && it.playerName ? String(it.playerName) : "",
+        gmNote: wrapped && it.gmNote ? String(it.gmNote) : "",
+        updatedAt: wrapped && it.updatedAt ? Number(it.updatedAt) : 0
+      });
+    });
+    return out;
+  }
+  function mergeIn(rec, fileTime){
+    var key = rec.sheet.name.trim().toLowerCase();
+    var ex = party.filter(function(p){ return p.key === key; })[0];
+    if(ex){
+      ex.sheet = rec.sheet;
+      ex.updatedAt = rec.updatedAt || fileTime;
+      if(rec.playerName && !ex.playerName) ex.playerName = rec.playerName;
+      if(rec.gmNote && !ex.gmNote) ex.gmNote = rec.gmNote;
+      return "updated";
+    }
+    party.push({key: key, playerName: rec.playerName, gmNote: rec.gmNote, updatedAt: rec.updatedAt || fileTime, sheet: rec.sheet});
+    return "added";
+  }
+
+  function readFile(f){
+    return new Promise(function(res){
+      var r = new FileReader();
+      r.onload = function(){ res({name: f.name, text: String(r.result), time: f.lastModified || Date.now()}); };
+      r.onerror = function(){ res({name: f.name, error: true}); };
+      r.readAsText(f);
+    });
+  }
+  async function handleFiles(files){
+    var added = 0, updated = 0, bad = [];
+    for(var i = 0; i < files.length; i++){
+      var r = await readFile(files[i]);
+      if(r.error){ bad.push(r.name); continue; }
+      var data;
+      try{ data = JSON.parse(r.text); }catch(e){ bad.push(r.name); continue; }
+      var recs = normalize(data);
+      if(!recs.length){ bad.push(r.name); continue; }
+      recs.forEach(function(rec){ if(mergeIn(rec, r.time) === "added") added++; else updated++; });
+    }
+    save(); render();
+    var parts = [];
+    if(added) parts.push("เพิ่มใหม่ " + added);
+    if(updated) parts.push("อัปเดต " + updated);
+    var text = parts.length ? "สำเร็จ: " + parts.join(" · ") + " ตัวละคร" : "";
+    if(bad.length) text += (text ? "\n" : "") + "อ่านไม่ได้/ไม่ใช่ไฟล์ตัวละคร: " + bad.join(", ");
+    msg(text || "ไม่พบไฟล์", !parts.length);
+  }
+
+  // ---------- rendering ----------
+  function lineB(label, value, cls){
+    var d = el("div", "ln" + (cls ? " " + cls : ""));
+    d.appendChild(el("b", null, label + " "));
+    d.appendChild(document.createTextNode(value));
+    return d;
+  }
+  function listLine(label, arr, fmt){
+    arr = (arr || []).filter(function(x){ return x && x.name; });
+    return lineB(label, arr.length ? arr.map(fmt).join(", ") : "—");
+  }
+  function card(rec){
+    var s = rec.sheet || {};
+    var c = el("div", "pcard");
+    c.appendChild(el("h3", null, s.name || "(ไม่มีชื่อ)"));
+    var fLabel = {shifter:"Shifter", outlaw:"Outlaws", cpd:"C.P.D."}[s.factor] || "—";
+    var jobLabel = s.factor === "cpd" ? "Rank" : "Job";
+    c.appendChild(el("div", "who", fLabel + (s.age ? " · " + jobLabel + " " + s.age : "")));
+
+    var pn = el("input"); pn.type = "text"; pn.placeholder = "ชื่อผู้เล่น"; pn.maxLength = 40; pn.value = rec.playerName || "";
+    pn.addEventListener("input", function(){ rec.playerName = pn.value; save(); });
+    c.appendChild(pn);
+
+    var hp = s.hp || {}, sp = s.sp || {}, ba = s.basicAbility || {}, bm = s.basicAbilityMod || {};
+    c.appendChild(lineB("HP", (hp.cur||0) + " / " + (hp.max||0) + "  (AMR+" + (hp.amr||0) + " RGN+" + (hp.rgn||0) + ")"));
+    if(s.factor !== "cpd") c.appendChild(lineB("SP", (sp.cur||0) + " / " + (sp.max||0) + "  (PWR+" + (sp.pwr||0) + " RGN+" + (sp.rgn||0) + ")"));
+    c.appendChild(lineB("Coins", String(s.coins||0) + "  ·  Rep " + (s.repGain||0) + " / " + (s.repCur||0)));
+    function baStr(k){
+      var m = parseInt(bm[k]) || 0;
+      return (ba[k] || 1) + (m ? "(" + (m > 0 ? "+" : "") + m + ")" : "");
+    }
+    c.appendChild(lineB("Ability", "Force " + baStr("force") + " · Tactical " + baStr("tactical") + " · Trick " + baStr("trick") + " · Sense " + baStr("sense")));
+    c.appendChild(lineB("Dice", "Surge " + (s.shifterDice||0) + " · Exhaust " + (s.exhaustDice||0) + " · Adv " + (s.advancePts||0)));
+    var inj = s.injuries || {};
+    var details = {"Poisoned": "Lv." + (s.poisonLv||1), "Bleeding": "DMG+" + (s.bleedDmg||1), "Fainted": "Roll " + (s.faintRoll||8), "Paralyzed": s.paralyzedPart || ""};
+    var active = Object.keys(inj).filter(function(k){ return inj[k]; }).map(function(k){ return details[k] ? k + " (" + details[k] + ")" : k; });
+    c.appendChild(lineB("Injuries", active.length ? active.join(", ") : "—", active.length ? "warn" : ""));
+
+    var det = el("details");
+    det.appendChild(el("summary", null, "รายละเอียดเต็ม"));
+    var tr = s.trait; if(typeof tr === "string") tr = {name:"", fx:tr}; tr = tr || {};
+    det.appendChild(lineB(s.factor === "cpd" ? "Division" : "Trait", (tr.name || "—") + (tr.fx ? " — " + tr.fx : "")));
+    det.appendChild(lineB("Flaw", s.flaw || "—"));
+    det.appendChild(listLine("Items", s.items, function(x){ return x.name + " (" + (x.slots||1) + ")"; }));
+    det.appendChild(listLine("Bonded", s.bondedItems, function(x){ return x.name + (x.effect ? " — " + x.effect : ""); }));
+    det.appendChild(listLine("Skills", s.generalSkills, function(x){ return x.name + (x.fx ? " — " + x.fx : ""); }));
+    det.appendChild(listLine("Weapons", s.weapons, function(x){ return x.name + " [R" + (x.range||"?") + " DMG " + (x.dmg||"—") + "]"; }));
+    det.appendChild(listLine("Gears", s.gears, function(x){ return x.name; }));
+    det.appendChild(listLine("Cosmic", s.cosmicAbilities, function(x){ return x.name + " (SP " + (x.sp||"—") + ", CD " + (x.cd||"—") + ")"; }));
+    if(s.vehicle || s.speed) det.appendChild(lineB("Vehicle", (s.vehicle || "—") + (s.speed ? " · " + s.speed + " m." : "")));
+    det.appendChild(lineB("Bio", s.bio || "—"));
+    c.appendChild(det);
+
+    var note = el("textarea"); note.placeholder = "โน้ต GM (เห็นเฉพาะในหน้านี้)"; note.value = rec.gmNote || "";
+    note.addEventListener("input", function(){ rec.gmNote = note.value; save(); });
+    c.appendChild(note);
+
+    var foot = el("div", "foot");
+    foot.appendChild(el("span", "stamp", rec.updatedAt ? "ข้อมูลล่าสุด " + new Date(rec.updatedAt).toLocaleString() : ""));
+    var rm = el("button", "btn ghost rm", "ลบ"); rm.type = "button";
+    var armed = false;
+    rm.addEventListener("click", function(){
+      if(!armed){
+        armed = true; rm.textContent = "ยืนยันลบ?";
+        setTimeout(function(){ armed = false; rm.textContent = "ลบ"; }, 3000);
+        return;
+      }
+      party = party.filter(function(p){ return p !== rec; });
+      save(); render();
+    });
+    foot.appendChild(rm);
+    c.appendChild(foot);
+    return c;
+  }
+  function render(){
+    var list = $("list");
+    list.textContent = "";
+    $("count").textContent = party.length + " ตัวละคร";
+    $("exportBtn").disabled = !party.length;
+    $("clearBtn").disabled = !party.length;
+    if(!party.length){ list.appendChild(el("div", "empty", "ยังไม่มีตัวละคร — อัปโหลดไฟล์ JSON ของผู้เล่นด้านบน")); return; }
+    var grid = el("div", "party-grid");
+    party.slice().sort(function(a, b){
+      return (a.sheet.name || "").toLowerCase() < (b.sheet.name || "").toLowerCase() ? -1 : 1;
+    }).forEach(function(rec){ grid.appendChild(card(rec)); });
+    list.appendChild(grid);
+  }
+
+  // ---------- wiring ----------
+  $("file").addEventListener("change", function(){
+    if(this.files && this.files.length) handleFiles(Array.prototype.slice.call(this.files));
+    this.value = "";
+  });
+  var drop = $("drop");
+  ["dragenter", "dragover"].forEach(function(ev){
+    drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add("over"); });
+  });
+  ["dragleave", "drop"].forEach(function(ev){
+    drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove("over"); });
+  });
+  drop.addEventListener("drop", function(e){
+    var files = e.dataTransfer && e.dataTransfer.files;
+    if(files && files.length) handleFiles(Array.prototype.slice.call(files));
+  });
+  // dropping a file elsewhere on the page shouldn't navigate away from it
+  window.addEventListener("dragover", function(e){ e.preventDefault(); });
+  window.addEventListener("drop", function(e){ e.preventDefault(); });
+
+  $("exportBtn").addEventListener("click", function(){
+    var out = party.map(function(p){
+      return {playerName: p.playerName || "", gmNote: p.gmNote || "", updatedAt: p.updatedAt || 0, sheet: p.sheet};
+    });
+    var blob = new Blob([JSON.stringify(out, null, 2)], {type: "application/json"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = "shifter_punkz_party.json";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+  var clearArmed = false;
+  $("clearBtn").addEventListener("click", function(){
+    var btn = this;
+    if(!clearArmed){
+      clearArmed = true; btn.textContent = "กดอีกครั้งเพื่อยืนยันการล้างทั้งหมด";
+      setTimeout(function(){ clearArmed = false; btn.textContent = "ล้างทั้งหมด"; }, 4000);
+      return;
+    }
+    clearArmed = false; btn.textContent = "ล้างทั้งหมด";
+    party = []; save(); render(); msg("ล้างข้อมูลแล้ว");
+  });
+
+  load();
+  render();
+})();
+</script>
+</body>
+</html>
